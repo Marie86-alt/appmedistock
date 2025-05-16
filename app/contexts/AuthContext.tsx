@@ -1,8 +1,8 @@
-// src/contexts/AuthContext.tsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+//contexts/AuthContext.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, ApiResponse } from '../types';
-import api from '../services/api';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import api from '../../services/api';
+import { ApiResponse, User } from '../types/models';
 
 // Définition des types pour le contexte d'authentification
 type AuthContextType = {
@@ -76,8 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.success && response.data) {
         const { token, user: userData } = response.data;
+        // Correction ici - utilisation de userData au lieu de user
         await AsyncStorage.setItem('userToken', token);
-        await AsyncStorage.setItem('userData', JSON.stringify(user));
+        await AsyncStorage.setItem('userData', JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
       }
@@ -92,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Fonction d'inscription
+  // Fonction d'inscription corrigée
   const register = async (userData: {
     email: string;
     password: string;
@@ -101,36 +102,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     phone?: string;
   }) => {
     try {
-      // Si votre API a une fonction d'inscription, utilisez-la ici
-      // Pour l'instant, nous simulons une inscription réussie
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('AuthContext - Tentative d\'inscription avec:', userData.email);
 
-      const mockResponse: ApiResponse<{ token: string; user: User }> = {
-        success: true,
-        data: {
-          token: 'fake-token-' + Math.random().toString(36).substring(2, 15),
-          user: {
-            id: Math.random().toString(36).substring(2, 10),
-            email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            phone: userData.phone || '',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        },
-      };
+      // Utiliser l'API pour l'inscription
+      const response = await api.register(userData);
 
-      return mockResponse;
+      console.log('AuthContext - Réponse brute de l\'API:', response);
+
+      if (response.success && response.data) {
+        const { token, user: registeredUser } = response.data;
+        // Stocker le token et les données utilisateur
+        await AsyncStorage.setItem('userToken', token);
+        await AsyncStorage.setItem('userData', JSON.stringify(registeredUser));
+        // Mettre à jour l'état
+        setUser(registeredUser);
+        setIsAuthenticated(true);
+        return response;
+      } else {
+        // Assurer qu'il y a toujours un message d'erreur
+        console.log('AuthContext - Échec de l\'inscription:', response.message || 'Erreur inconnue');
+        return {
+          success: false,
+          message: response.message || 'Une erreur s\'est produite lors de l\'inscription'
+        };
+      }
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
+      console.error('AuthContext - Erreur complète lors de l\'inscription:', error);
       return {
         success: false,
-        message: 'Une erreur s\'est produite lors de l\'inscription',
+        message: 'Une erreur s\'est produite lors de l\'inscription'
       };
     }
   };
-
   // Fonction de déconnexion
   const logout = async () => {
     try {
@@ -161,3 +164,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export default AuthContext;
+
+
+
+
+

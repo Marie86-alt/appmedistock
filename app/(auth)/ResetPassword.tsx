@@ -1,4 +1,5 @@
 // src/screens/auth/ResetPasswordScreen.tsx
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,12 +14,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import api from '../services/api';
+import api from '../../services/api';
 import theme from '../styles/theme';
 
 
-const ResetPasswordScreen: React.FC = () => {
+const ResetPassword: React.FC = () => {
   const router = useRouter();
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token') || '';
@@ -97,7 +97,7 @@ const ResetPasswordScreen: React.FC = () => {
 
   // Navigation vers l'écran de connexion
   const navigateToLogin = () => {
-    router.push('/auth/LoginScreen');
+    router.push('/(auth)/Login');
   };
 
   return (
@@ -327,4 +327,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResetPasswordScreen;
+export default ResetPassword;

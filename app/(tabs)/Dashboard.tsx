@@ -1,27 +1,27 @@
 // app/main/DashboardScreen.tsx
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  TouchableOpacity,
-  Alert,
-  SafeAreaView,
-} from 'react-native';
 import { useRouter } from 'expo-router';
-import theme from '../../styles/theme';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import api from '../../services/api';
-import { Medication, Reminder } from '../../types';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import theme from '../styles/theme';
+import { Medication, Reminder } from '../types/models';
 
 // Interface pour les props du DashboardScreen
 interface DashboardScreenProps {
   onLogout: () => Promise<void>;
 }
 
-const DashboardScreen: React.FC<DashboardScreenProps> = ({ onLogout }) => {
+const Dashboard: React.FC<DashboardScreenProps> = ({ onLogout }) => {
   const router = useRouter();
   // États locaux
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -86,7 +86,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onLogout }) => {
             try {
               await onLogout();
               // La navigation vers l'écran de connexion se fait automatiquement via le contexte
-              router.replace('/auth/LoginScreen');
+              router.replace('/Login');
             } catch (err) { // Renommé pour éviter le conflit avec l'état 'error'
               console.error('Erreur lors de la déconnexion:', err);
               Alert.alert('Erreur', 'Impossible de se déconnecter. Veuillez réessayer.');
@@ -120,7 +120,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onLogout }) => {
 
   // Navigation vers la liste des médicaments
   const navigateToMedicationList = () => {
-    router.push('/screens/main/MedicationListScreen');
+    router.push('/MedicationList');
   };
 
   // Afficher un indicateur de chargement pendant le chargement initial
@@ -175,7 +175,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onLogout }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Rappels du jour</Text>
-            <TouchableOpacity onPress={() => router.push('/screens/main/RemindersScreen')}>
+            <TouchableOpacity onPress={() => router.push('/Reminders')}>
               <Text style={styles.viewAllText}>Voir tout</Text>
             </TouchableOpacity>
           </View>
@@ -239,7 +239,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onLogout }) => {
                 <TouchableOpacity 
                   style={styles.medicationActionButton}
                   onPress={() => router.push({
-                    pathname: '/screens/main/EditMedicationScreen',
+                    pathname: '/EditMedication',
                     params: { id: medication.id }
                   })}
                 >
@@ -255,7 +255,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onLogout }) => {
       
       <TouchableOpacity 
         style={styles.addButton}
-        onPress={() => router.push('/screens/main/AddMedicationScreen')}
+        onPress={() => router.push('/AddMedication')}
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
@@ -449,4 +449,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DashboardScreen;
+export default Dashboard;

@@ -1,4 +1,5 @@
-// src/screens/auth/RegisterScreen.tsx
+
+
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,29 +14,21 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useRouter} from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
-//import { AuthStackParamList } from '../navigation/AuthNavigator';
 import theme from '../styles/theme';
 
-//type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Register'>;
-
-const RegisterScreen: React.FC = () => {
+const Register: React.FC = () => {
   const router = useRouter();
   const { register } = useAuth();
 
-  // États du formulaire
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
-
-  // État pour afficher/masquer le mot de passe
   const [showPassword] = useState(false);
-
-  // États d'erreur
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -43,11 +36,8 @@ const RegisterScreen: React.FC = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [generalError, setGeneralError] = useState('');
-
-  // État de chargement
   const [isLoading, setIsLoading] = useState(false);
 
-  // Validation du prénom
   const validateFirstName = () => {
     if (!firstName.trim()) {
       setFirstNameError('Le prénom est requis');
@@ -58,7 +48,6 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // Validation du nom
   const validateLastName = () => {
     if (!lastName.trim()) {
       setLastNameError('Le nom est requis');
@@ -69,14 +58,13 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // Validation de l'email
   const validateEmail = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
-      setEmailError('L\'email est requis');
+      setEmailError("L'email est requis");
       return false;
     } else if (!emailRegex.test(email)) {
-      setEmailError('Format d\'email invalide');
+      setEmailError("Format d'email invalide");
       return false;
     } else {
       setEmailError('');
@@ -84,7 +72,6 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // Validation du mot de passe
   const validatePassword = () => {
     if (!password) {
       setPasswordError('Le mot de passe est requis');
@@ -98,7 +85,6 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // Validation de la confirmation du mot de passe
   const validateConfirmPassword = () => {
     if (!confirmPassword) {
       setConfirmPasswordError('Veuillez confirmer votre mot de passe');
@@ -112,7 +98,6 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // Validation optionnelle du numéro de téléphone
   const validatePhone = () => {
     if (phone && !/^\d{10}$/.test(phone.replace(/\s/g, ''))) {
       setPhoneError('Format de numéro de téléphone invalide');
@@ -123,12 +108,12 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // Gestion de l'inscription
   const handleRegister = async () => {
-    // Réinitialiser l'erreur générale
+    console.log('Début de handleRegister');
+    console.log('Données soumises:', { firstName, lastName, email, phone, password, confirmPassword });
+
     setGeneralError('');
 
-    // Valider tous les champs
     const isFirstNameValid = validateFirstName();
     const isLastNameValid = validateLastName();
     const isEmailValid = validateEmail();
@@ -136,11 +121,19 @@ const RegisterScreen: React.FC = () => {
     const isConfirmPasswordValid = validateConfirmPassword();
     const isPhoneValid = validatePhone();
 
+    console.log('Résultat de la validation:', {
+      isFirstNameValid,
+      isLastNameValid,
+      isEmailValid,
+      isPasswordValid,
+      isConfirmPasswordValid,
+      isPhoneValid,
+    });
+
     if (isFirstNameValid && isLastNameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid && isPhoneValid) {
       setIsLoading(true);
-
       try {
-        // Utiliser le contexte d'authentification pour l'inscription
+        console.log('Appel de la fonction register...');
         const response = await register({
           email,
           password,
@@ -148,43 +141,41 @@ const RegisterScreen: React.FC = () => {
           lastName,
           phone,
         });
+        console.log('Réponse de register:', response);
 
         if (response.success) {
-          // Inscription réussie
           Alert.alert(
             'Inscription réussie',
             'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.',
             [
               {
                 text: 'OK',
-                onPress: () => router.push('/auth/LoginScreen'),
+                onPress: () => router.push('/Login'),
               },
             ]
           );
         } else {
-          // Erreur d'inscription
-          setGeneralError(response.message || 'Une erreur s\'est produite lors de l\'inscription');
+          console.log('Échec de l\'inscription:', response.message);
+          setGeneralError(response.message || "Une erreur s'est produite lors de l'inscription");
         }
-      } catch (error) {
-        console.error('Erreur lors de l\'inscription:', error);
+      } catch {
+        console.error("Erreur lors de l'inscription");
         setGeneralError('Une erreur s\'est produite lors de l\'inscription. Veuillez réessayer.');
       } finally {
         setIsLoading(false);
       }
+    } else {
+      console.log('Validation échouée');
     }
   };
 
-  // Navigation vers l'écran de connexion
   const navigateToLogin = () => {
-    router.push('/auth/LoginScreen');
+    router.push('/Login');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.headerContainer}>
             <Text style={styles.appTitle}>MédiStock</Text>
@@ -192,14 +183,11 @@ const RegisterScreen: React.FC = () => {
           </View>
 
           <View style={styles.formContainer}>
-            {generalError ? (
-              <Text style={styles.generalError}>{generalError}</Text>
-            ) : null}
+            {generalError ? <Text style={styles.generalError}>{generalError}</Text> : null}
 
-            {/* Prénom */}
             <Text style={styles.label}>Prénom</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputShadow]}
               value={firstName}
               onChangeText={setFirstName}
               onBlur={validateFirstName}
@@ -208,10 +196,9 @@ const RegisterScreen: React.FC = () => {
             />
             {firstNameError ? <Text style={styles.errorText}>{firstNameError}</Text> : null}
 
-            {/* Nom */}
             <Text style={styles.label}>Nom</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputShadow]}
               value={lastName}
               onChangeText={setLastName}
               onBlur={validateLastName}
@@ -220,10 +207,9 @@ const RegisterScreen: React.FC = () => {
             />
             {lastNameError ? <Text style={styles.errorText}>{lastNameError}</Text> : null}
 
-            {/* Email */}
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputShadow]}
               value={email}
               onChangeText={setEmail}
               onBlur={validateEmail}
@@ -234,10 +220,9 @@ const RegisterScreen: React.FC = () => {
             />
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-            {/* Numéro de téléphone (optionnel) */}
             <Text style={styles.label}>Numéro de téléphone (optionnel)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputShadow]}
               value={phone}
               onChangeText={setPhone}
               onBlur={validatePhone}
@@ -247,10 +232,9 @@ const RegisterScreen: React.FC = () => {
             />
             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
-            {/* Mot de passe */}
             <Text style={styles.label}>Mot de passe</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputShadow]}
               value={password}
               onChangeText={setPassword}
               onBlur={validatePassword}
@@ -260,10 +244,9 @@ const RegisterScreen: React.FC = () => {
             />
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
-            {/* Confirmation du mot de passe */}
             <Text style={styles.label}>Confirmez le mot de passe</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputShadow]}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               onBlur={validateConfirmPassword}
@@ -299,98 +282,33 @@ const RegisterScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
+  container: { flex: 1, backgroundColor: theme.colors.background },
+  keyboardView: { flex: 1 },
+  scrollContent: { flexGrow: 1, padding: theme.spacing.m },
+  headerContainer: { alignItems: 'center', marginBottom: theme.spacing.xl, marginTop: theme.spacing.l },
+  appTitle: { fontSize: theme.typography.fontSizes.title, fontWeight: 'bold', color: theme.colors.primary, marginBottom: theme.spacing.xs },
+  appSubtitle: { fontSize: theme.typography.fontSizes.large, color: theme.colors.textSecondary },
+  formContainer: { width: '100%' },
+  generalError: { color: theme.colors.error, fontSize: theme.typography.fontSizes.medium, textAlign: 'center', marginBottom: theme.spacing.m, padding: theme.spacing.s, backgroundColor: '#FFEBEE', borderRadius: theme.borderRadius.small },
+  label: { fontSize: theme.typography.fontSizes.medium, fontWeight: '600', marginBottom: theme.spacing.xs, color: theme.colors.text },
+  input: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.borderRadius.medium, padding: theme.spacing.m, fontSize: theme.typography.fontSizes.medium, marginBottom: theme.spacing.m, backgroundColor: theme.colors.surface },
+  inputShadow: Platform.OS === 'web' ? {
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  } : {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: theme.spacing.m,
-  },
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    marginTop: theme.spacing.l,
-  },
-  appTitle: {
-    fontSize: theme.typography.fontSizes.title,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  appSubtitle: {
-    fontSize: theme.typography.fontSizes.large,
-    color: theme.colors.textSecondary,
-  },
-  formContainer: {
-    width: '100%',
-  },
-  generalError: {
-    color: theme.colors.error,
-    fontSize: theme.typography.fontSizes.medium,
-    textAlign: 'center',
-    marginBottom: theme.spacing.m,
-    padding: theme.spacing.s,
-    backgroundColor: '#FFEBEE', // Fond rouge très pâle
-    borderRadius: theme.borderRadius.small,
-  },
-  label: {
-    fontSize: theme.typography.fontSizes.medium,
-    fontWeight: '600',
-    marginBottom: theme.spacing.xs,
-    color: theme.colors.text,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.m,
-    fontSize: theme.typography.fontSizes.medium,
-    marginBottom: theme.spacing.m,
-    backgroundColor: theme.colors.surface,
-  },
-  errorText: {
-    color: theme.colors.error,
-    fontSize: theme.typography.fontSizes.small,
-    marginTop: -theme.spacing.m,
-    marginBottom: theme.spacing.m,
-  },
-  registerButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.m,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-    marginBottom: theme.spacing.l,
-    marginTop: theme.spacing.s,
-  },
-  disabledButton: {
-    backgroundColor: theme.colors.disabled,
-  },
-  registerButtonText: {
-    color: 'white',
-    fontSize: theme.typography.fontSizes.large,
-    fontWeight: '600',
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: theme.spacing.xs,
-    marginBottom: theme.spacing.xl,
-  },
-  loginText: {
-    fontSize: theme.typography.fontSizes.medium,
-    color: theme.colors.textSecondary,
-  },
-  loginLink: {
-    fontSize: theme.typography.fontSizes.medium,
-    color: theme.colors.primary,
-    fontWeight: '600',
-  },
+  errorText: { color: theme.colors.error, fontSize: theme.typography.fontSizes.small, marginTop: -theme.spacing.m, marginBottom: theme.spacing.m },
+  registerButton: { backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.medium, padding: theme.spacing.m, alignItems: 'center', justifyContent: 'center', height: 50, marginBottom: theme.spacing.l, marginTop: theme.spacing.s },
+  disabledButton: { backgroundColor: theme.colors.disabled },
+  registerButtonText: { color: 'white', fontSize: theme.typography.fontSizes.large, fontWeight: '600' },
+  loginContainer: { flexDirection: 'row', justifyContent: 'center', gap: theme.spacing.xs, marginBottom: theme.spacing.xl },
+  loginText: { fontSize: theme.typography.fontSizes.medium, color: theme.colors.textSecondary },
+  loginLink: { fontSize: theme.typography.fontSizes.medium, color: theme.colors.primary, fontWeight: '600' },
 });
 
-export default RegisterScreen;
+export default Register;
+

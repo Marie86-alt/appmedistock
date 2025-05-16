@@ -1,21 +1,22 @@
-// app/main/AddMedicationScreen.tsx
-import React, { useState } from 'react';
+// app/main/EditMedicationScreen.tsx
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import theme from '../../styles/theme';
-//import api from '../../services/api';
+import api from '../../services/api';
+import theme from '../styles/theme';
+import { Medication } from '../types/models';
 
 // Couleurs prédéfinies pour les médicaments
 const PREDEFINED_COLORS = [
@@ -29,15 +30,18 @@ const PREDEFINED_COLORS = [
   '#795548', // Marron
 ];
 
-const AddMedicationScreen: React.FC = () => {
+const EditMedication: React.FC = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const medicationId = typeof params.id === 'string' ? params.id : '';
   
   // États du formulaire
+  const [medication, setMedication] = useState<Medication | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [dosage, setDosage] = useState('');
   const [unit, setUnit] = useState('mg');
-  const [initialStock, setInitialStock] = useState('');
+  const [currentStock, setCurrentStock] = useState('');
   const [reorderThreshold, setReorderThreshold] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [notes, setNotes] = useState('');
@@ -46,15 +50,58 @@ const AddMedicationScreen: React.FC = () => {
   // État de validation
   const [nameError, setNameError] = useState('');
   const [dosageError, setDosageError] = useState('');
-  const [initialStockError, setInitialStockError] = useState('');
+  const [currentStockError, setCurrentStockError] = useState('');
   const [reorderThresholdError, setReorderThresholdError] = useState('');
   const [expiryDateError, setExpiryDateError] = useState('');
   
-  // État de chargement
+  // États de chargement
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Options pour les unités
   const unitOptions = ['mg', 'ml', 'tablet', 'capsule', 'drop', 'application', 'unit'];
+  
+  // Charger les données du médicament (transformé en useCallback)
+  const loadMedicationData = useCallback(async () => {
+    try {
+      setError(null);
+      
+      const response = await api.getMedicationById(medicationId);
+      
+      if (response.success && response.data) {
+        const medicationData = response.data;
+        setMedication(medicationData);
+        
+        // Initialiser les états du formulaire avec les données du médicament
+        setName(medicationData.name || '');
+        setDescription(medicationData.description || '');
+        setDosage(medicationData.dosage ? medicationData.dosage.toString() : '');
+        setUnit(medicationData.unit || 'mg');
+        setCurrentStock(medicationData.currentStock ? medicationData.currentStock.toString() : '');
+        setReorderThreshold(medicationData.reorderThreshold ? medicationData.reorderThreshold.toString() : '');
+        setExpiryDate(medicationData.expiryDate || '');
+        setNotes(medicationData.notes || '');
+        setSelectedColor(medicationData.color || PREDEFINED_COLORS[0]);
+      } else {
+        setError('Impossible de récupérer les informations du médicament');
+      }
+    } catch {
+      setError('Une erreur est survenue lors du chargement des données');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [medicationId]);
+  
+  // UseEffect avec dépendances corrigées
+  useEffect(() => {
+    if (medicationId) {
+      loadMedicationData();
+    } else {
+      setError('Identifiant de médicament manquant');
+      setIsLoading(false);
+    }
+  }, [medicationId, loadMedicationData]);
   
   // Validation du nom
   const validateName = () => {
@@ -81,16 +128,16 @@ const AddMedicationScreen: React.FC = () => {
     }
   };
   
-  // Validation du stock initial
-  const validateInitialStock = () => {
-    if (!initialStock) {
-      setInitialStockError('Le stock initial est requis');
+  // Validation du stock actuel
+  const validateCurrentStock = () => {
+    if (!currentStock) {
+      setCurrentStockError('Le stock actuel est requis');
       return false;
-    } else if (isNaN(Number(initialStock)) || Number(initialStock) < 0) {
-      setInitialStockError('Le stock doit être un nombre positif ou zéro');
+    } else if (isNaN(Number(currentStock)) || Number(currentStock) < 0) {
+      setCurrentStockError('Le stock doit être un nombre positif ou zéro');
       return false;
     } else {
-      setInitialStockError('');
+      setCurrentStockError('');
       return true;
     }
   };
@@ -122,15 +169,15 @@ const AddMedicationScreen: React.FC = () => {
       return false;
     }
     
-    const selectedDate = new Date(expiryDate);
-    const today = new Date();
-    if (selectedDate <= today) {
-      setExpiryDateError('La date d&apos;expiration doit être future');
-      return false;
-    }
-    
     setExpiryDateError('');
     return true;
+  };
+  
+  // Mettre à jour le stock actuel
+  const handleUpdateStock = (increment: boolean) => {
+    const currentValue = Number(currentStock) || 0;
+    const newValue = increment ? currentValue + 1 : Math.max(0, currentValue - 1);
+    setCurrentStock(newValue.toString());
   };
   
   // Gestion de la soumission du formulaire
@@ -138,43 +185,40 @@ const AddMedicationScreen: React.FC = () => {
     // Valider tous les champs
     const isNameValid = validateName();
     const isDosageValid = validateDosage();
-    const isInitialStockValid = validateInitialStock();
+    const isCurrentStockValid = validateCurrentStock();
     const isReorderThresholdValid = validateReorderThreshold();
     const isExpiryDateValid = validateExpiryDate();
     
-    if (isNameValid && isDosageValid && isInitialStockValid && isReorderThresholdValid && isExpiryDateValid) {
+    if (isNameValid && isDosageValid && isCurrentStockValid && isReorderThresholdValid && isExpiryDateValid) {
       setIsSubmitting(true);
       
       try {
-        // Construire l'objet médicament
-        // Cette variable sera utilisée lorsque l'API sera implémentée
-        // Pour le développement, on la log dans la console
-        const medicationData = {
+        // Construire l'objet médicament mis à jour
+        const updatedMedicationData = {
+          id: medicationId,
           name,
           description,
           dosage: Number(dosage),
           unit: unit as 'tablet' | 'capsule' | 'ml' | 'mg' | 'drop' | 'application' | 'unit',
-          initialStock: Number(initialStock),
-          currentStock: Number(initialStock), // Initialement égal au stock initial
+          currentStock: Number(currentStock),
           reorderThreshold: Number(reorderThreshold),
           expiryDate: expiryDate || undefined,
           color: selectedColor,
           notes,
           isActive: true,
-          frequency: 'asNeeded', // Par défaut
-          patientId: '1', // À remplacer par l'ID réel de l'utilisateur
+          frequency: medication?.frequency || 'asNeeded',
+          patientId: medication?.patientId || '1',
         };
         
-        // Log les données pour le développement
-        console.log('Données du médicament à ajouter:', medicationData);
+        // Pour le développement, loguer les données qui seraient envoyées à l'API
+        console.log('Données du médicament à mettre à jour:', updatedMedicationData);
         
-        // Simuler temporairement l'ajout d'un médicament
-        // Dans une version future, cela serait remplacé par un appel à l'API
+        // Simuler temporairement la mise à jour d'un médicament
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         Alert.alert(
           'Fonctionnalité en développement',
-          'L\'ajout de médicaments sera disponible dans une prochaine mise à jour.',
+          'La modification de médicaments sera disponible dans une prochaine mise à jour.',
           [
             {
               text: 'OK',
@@ -184,13 +228,13 @@ const AddMedicationScreen: React.FC = () => {
         );
         
         /* Code à utiliser lorsque l'API sera prête
-        if (api.addMedication) {
-          const response = await api.addMedication(medicationData);
+        if (api.updateMedication) {
+          const response = await api.updateMedication(medicationId, updatedMedicationData);
           
           if (response.success) {
             Alert.alert(
-              'Médicament ajouté',
-              `${name} a été ajouté avec succès à votre liste de médicaments.`,
+              'Médicament mis à jour',
+              `${name} a été mis à jour avec succès.`,
               [
                 {
                   text: 'OK',
@@ -199,17 +243,47 @@ const AddMedicationScreen: React.FC = () => {
               ]
             );
           } else {
-            Alert.alert('Erreur', response.message || 'Impossible d\'ajouter le médicament');
+            Alert.alert('Erreur', response.message || 'Impossible de mettre à jour le médicament');
           }
         }
         */
-      } catch  {
-        Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du médicament');
+      } catch {
+        Alert.alert('Erreur', 'Une erreur est survenue lors de la mise à jour du médicament');
       } finally {
         setIsSubmitting(false);
       }
     }
   };
+  
+  // Afficher un chargement pendant la récupération des données
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </SafeAreaView>
+    );
+  }
+  
+  // Afficher une erreur si le chargement a échoué
+  if (error) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <Text style={styles.errorTitle}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={loadMedicationData}
+        >
+          <Text style={styles.retryButtonText}>Réessayer</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.backButtonRetry}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonRetryText}>Retour</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
   
   return (
     <SafeAreaView style={styles.container}>
@@ -225,7 +299,7 @@ const AddMedicationScreen: React.FC = () => {
           >
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Ajouter un médicament</Text>
+          <Text style={styles.title}>Modifier le médicament</Text>
           <View style={styles.placeholderButton} />
         </View>
         
@@ -306,36 +380,46 @@ const AddMedicationScreen: React.FC = () => {
             </View>
           </View>
           
-          {/* Stock et seuil */}
-          <View style={styles.row}>
-            <View style={styles.halfColumn}>
-              <Text style={styles.label}>Stock initial*</Text>
-              <TextInput
-                style={styles.input}
-                value={initialStock}
-                onChangeText={setInitialStock}
-                onBlur={validateInitialStock}
-                placeholder="Ex: 30"
-                keyboardType="numeric"
-                editable={!isSubmitting}
-              />
-              {initialStockError ? <Text style={styles.errorText}>{initialStockError}</Text> : null}
-            </View>
-            
-            <View style={styles.halfColumn}>
-              <Text style={styles.label}>Seuil d&apos;alerte*</Text>
-              <TextInput
-                style={styles.input}
-                value={reorderThreshold}
-                onChangeText={setReorderThreshold}
-                onBlur={validateReorderThreshold}
-                placeholder="Ex: 5"
-                keyboardType="numeric"
-                editable={!isSubmitting}
-              />
-              {reorderThresholdError ? <Text style={styles.errorText}>{reorderThresholdError}</Text> : null}
-            </View>
+          {/* Stock actuel */}
+          <Text style={styles.label}>Stock actuel*</Text>
+          <View style={styles.stockContainer}>
+            <TouchableOpacity
+              style={styles.stockButton}
+              onPress={() => handleUpdateStock(false)}
+              disabled={isSubmitting || Number(currentStock) <= 0}
+            >
+              <Text style={styles.stockButtonText}>-</Text>
+            </TouchableOpacity>
+            <TextInput
+              style={styles.stockInput}
+              value={currentStock}
+              onChangeText={setCurrentStock}
+              onBlur={validateCurrentStock}
+              keyboardType="numeric"
+              editable={!isSubmitting}
+            />
+            <TouchableOpacity
+              style={styles.stockButton}
+              onPress={() => handleUpdateStock(true)}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.stockButtonText}>+</Text>
+            </TouchableOpacity>
           </View>
+          {currentStockError ? <Text style={styles.errorText}>{currentStockError}</Text> : null}
+          
+          {/* Seuil de réapprovisionnement */}
+          <Text style={styles.label}>Seuil d&apos;alerte*</Text>
+          <TextInput
+            style={styles.input}
+            value={reorderThreshold}
+            onChangeText={setReorderThreshold}
+            onBlur={validateReorderThreshold}
+            placeholder="Ex: 5"
+            keyboardType="numeric"
+            editable={!isSubmitting}
+          />
+          {reorderThresholdError ? <Text style={styles.errorText}>{reorderThresholdError}</Text> : null}
           
           {/* Date d'expiration */}
           <Text style={styles.label}>Date d&apos;expiration (optionnel)</Text>
@@ -391,7 +475,7 @@ const AddMedicationScreen: React.FC = () => {
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>Ajouter</Text>
+              <Text style={styles.submitButtonText}>Enregistrer</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -404,6 +488,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.l,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -435,6 +524,33 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: theme.spacing.m,
     paddingBottom: theme.spacing.xl,
+  },
+  errorTitle: {
+    fontSize: theme.typography.fontSizes.large,
+    fontWeight: 'bold',
+    color: theme.colors.error,
+    marginBottom: theme.spacing.m,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.s,
+    paddingHorizontal: theme.spacing.l,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.m,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: theme.typography.fontSizes.medium,
+    fontWeight: '600',
+  },
+  backButtonRetry: {
+    paddingVertical: theme.spacing.s,
+    paddingHorizontal: theme.spacing.l,
+  },
+  backButtonRetryText: {
+    color: theme.colors.primary,
+    fontSize: theme.typography.fontSizes.medium,
   },
   label: {
     fontSize: theme.typography.fontSizes.medium,
@@ -469,6 +585,35 @@ const styles = StyleSheet.create({
   halfColumn: {
     flex: 1,
     marginHorizontal: theme.spacing.xs,
+  },
+  stockContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  stockButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stockButtonText: {
+    fontSize: 24,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  stockInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.m,
+    fontSize: theme.typography.fontSizes.medium,
+    backgroundColor: theme.colors.surface,
+    marginHorizontal: theme.spacing.m,
+    textAlign: 'center',
   },
   pickerContainer: {
     borderWidth: 1,
@@ -536,4 +681,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddMedicationScreen;
+export default EditMedication;

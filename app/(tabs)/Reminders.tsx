@@ -1,22 +1,22 @@
 // app/main/RemindersScreen.tsx
-import React, { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
   ActivityIndicator,
   Alert,
+  FlatList,
+  RefreshControl,
   SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import api from '../../services/api';
-import theme from '../../styles/theme';
-import { Reminder } from '../../types';
+import theme from '../styles/theme';
+import { Reminder } from '../types/models';
 
-const RemindersScreen: React.FC = () => {
+const Reminders: React.FC = () => {
   const router = useRouter();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RemindersScreen;
+export default Reminders;
 
 function handleSkipReminder(item: Reminder): void {
     throw new Error('Function not implemented.');

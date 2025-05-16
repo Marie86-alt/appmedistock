@@ -1,5 +1,6 @@
 // src/screens/auth/ForgotPasswordScreen.tsx
 
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,13 +15,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 //import { AuthStackParamList } from '../navigation/AuthNavigator';
-import api from '../services/api';
+import api from '../../services/api';
 import theme from '../styles/theme';
 //
 
-const ForgotPasswordScreen: React.FC = () => {
+const ForgotPassword: React.FC = () => {
   const router = useRouter();
   // États du formulaire
   const [email, setEmail] = useState('');
@@ -81,7 +81,7 @@ const ForgotPasswordScreen: React.FC = () => {
 
   // Navigation vers l'écran de connexion
   const navigateToLogin = () => {
-    router.push('/auth/LoginScreen');
+    router.push('/Login');
   };
 
   // Renvoyer l'email de réinitialisation
@@ -336,4 +336,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ForgotPasswordScreen;
+export default ForgotPassword;

@@ -1,4 +1,5 @@
 // src/styles/theme.ts
+import { Platform } from "react-native";
 const theme = {
     colors: {
       primary: '#2196F3',      // Bleu principal
@@ -27,6 +28,8 @@ const theme = {
         xxlarge: 22,
         title: 28,
       },
+      fontFamily: Platform.OS === 'web' ? "'Space Mono', 'monospace' : monospace" :
+      undefined, // Utiliser la police par défaut de React Native
     },
     borderRadius: {
       small: 4,

@@ -1,22 +1,22 @@
 // app/main/MedicationListScreen.tsx
-import React, { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
   ActivityIndicator,
   Alert,
+  FlatList,
+  RefreshControl,
   SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import api from '../../services/api';
-import theme from '../../styles/theme';
-import { Medication } from '../../types';
+import theme from '../styles/theme';
+import { Medication } from '../types/models';
 
-const MedicationListScreen: React.FC = () => {
+const MedicationList: React.FC = () => {
   const router = useRouter();
   const [medications, setMedications] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ const MedicationListScreen: React.FC = () => {
 
   const handleEditMedication = (medicationId: string) => {
     router.push({
-      pathname: '/screens/main/EditMedicationScreen',
+      pathname: '/(tabs)/EditMedication',
       params: { id: medicationId }
     });
   };
@@ -139,7 +139,7 @@ const MedicationListScreen: React.FC = () => {
         <Text style={styles.title}>Mes médicaments</Text>
         <TouchableOpacity 
           style={styles.addButton}
-          onPress={() => router.push('/screens/main/AddMedicationScreen')}
+          onPress={() => router.push('/AddMedication')}
         >
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
@@ -161,7 +161,7 @@ const MedicationListScreen: React.FC = () => {
               </Text>
               <TouchableOpacity
                 style={styles.addFirstButton}
-                onPress={() => router.push('/screens/main/AddMedicationScreen')}
+                onPress={() => router.push('/AddMedication')}
               >
                 <Text style={styles.addFirstButtonText}>
                   Ajouter un médicament
@@ -322,4 +322,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MedicationListScreen;
+export default MedicationList;
