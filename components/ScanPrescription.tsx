@@ -1,5 +1,5 @@
 // components/ScanPrescription.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,10 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Camera as ExpoCamera } from 'expo-camera'; // Suppression de CameraType
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
 import theme from '../app/styles/theme';
 
 // Import des types depuis votre fichier models
@@ -24,20 +25,13 @@ interface ScanPrescriptionProps {
 }
 
 export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPrescriptionProps) {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [scannedUri, setScannedUri] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [flashMode, setFlashMode] = useState<'off' | 'on'>('off');
-  const cameraRef = useRef<InstanceType<typeof ExpoCamera> | null>(null); // Typage corrigé
+  const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await ExpoCamera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
 
   // Optimisation de l'image avant l'OCR
   const optimizeImage = async (uri: string): Promise<string> => {
@@ -62,12 +56,16 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
 
     setScanning(true);
     try {
-      // Capture de la photo avec de meilleures options
+      // Capture de la photo
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.9,
         base64: false,
-        skipProcessing: false,
+        exif: false,
       });
+
+      if (!photo) {
+        throw new Error('Échec de la capture photo');
+      }
 
       setScannedUri(photo.uri);
       setProcessing(true);
@@ -75,7 +73,7 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
       // Optimiser l'image
       const optimizedUri = await optimizeImage(photo.uri);
 
-      // Extraction du texte (avec gestion d'erreur améliorée)
+      // Extraction du texte
       const text = await extractText(optimizedUri);
 
       if (!text || text.trim().length === 0) {
@@ -94,9 +92,9 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
         if (onScanComplete) {
           onScanComplete(medications);
         } else {
-          // Navigation par défaut
+          // Navigation par défaut - Correction du chemin
           router.push({
-            pathname: './(tabs)/addMedication', // Correction de la typo
+            pathname: '/AddMedication',
             params: {
               scannedData: JSON.stringify(medications),
               scanDate: new Date().toISOString(),
@@ -111,7 +109,7 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
             { text: 'Réessayer', onPress: () => setScannedUri(null) },
             {
               text: 'Saisie manuelle',
-              onPress: () => router.push('./(tabs)/addMedication'),
+              onPress: () => router.push('/AddMedication'),
             },
           ]
         );
@@ -130,8 +128,6 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
   };
 
   const extractText = async (uri: string): Promise<string> => {
-    // TODO: Remplacer par une vraie API OCR (Google Vision, AWS Textract, etc.)
-
     // Exemple avec Google Cloud Vision API
     if (ocrApiKey) {
       try {
@@ -177,9 +173,15 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
   };
 
   const convertToBase64 = async (uri: string): Promise<string> => {
-    // Implémentation de la conversion en base64
-    // Utiliser expo-file-system ou react-native-fs
-    return ''; // Placeholder
+    try {
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64;
+    } catch (error) {
+      console.error('Erreur conversion base64:', error);
+      return '';
+    }
   };
 
   const parseMedications = (text: string): ScannedMedication[] => {
@@ -230,7 +232,7 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
     setFlashMode((current) => (current === 'off' ? 'on' : 'off'));
   };
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -239,13 +241,13 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text style={styles.error}>Accès à la caméra refusé</Text>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => ExpoCamera.requestCameraPermissionsAsync()}
+          onPress={requestPermission}
         >
           <Text style={styles.buttonText}>Autoriser l&apos;accès</Text>
         </TouchableOpacity>
@@ -277,25 +279,25 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
         </View>
       ) : (
         <>
-          <ExpoCamera
+          <CameraView
             ref={cameraRef}
             style={styles.camera}
-            type="back"
-            flashMode={flashMode}
-            ratio="4:3"
+            facing="back"
+            flash={flashMode}
+            mode="picture"
           >
             <View style={styles.cameraOverlay}>
               <View style={styles.scanFrame} />
               <Text style={styles.instructionText}>
-                Placez l&#39;ordonnance dans le cadre
+                Placez l&apos;ordonnance dans le cadre
               </Text>
             </View>
-          </ExpoCamera>
+          </CameraView>
 
           <View style={styles.controls}>
             <TouchableOpacity style={styles.flashButton} onPress={toggleFlash}>
               <Text style={styles.flashIcon}>
-                {flashMode === 'on' ? '⚡' : '⚡'}
+                {flashMode === 'on' ? '⚡' : '💡'}
               </Text>
             </TouchableOpacity>
 
@@ -314,7 +316,10 @@ export default function ScanPrescription({ onScanComplete, ocrApiKey }: ScanPres
             <TouchableOpacity
               style={styles.galleryButton}
               onPress={() => {
-                /* TODO: Implémenter la sélection depuis la galerie */
+                Alert.alert(
+                  'Fonctionnalité à venir',
+                  'La sélection depuis la galerie sera disponible prochainement.'
+                );
               }}
             >
               <Text style={styles.galleryIcon}>🖼️</Text>
@@ -330,9 +335,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   camera: {
     flex: 1,
+    width: '100%',
   },
   cameraOverlay: {
     flex: 1,
@@ -407,6 +415,7 @@ const styles = StyleSheet.create({
   },
   previewContainer: {
     flex: 1,
+    width: '100%',
   },
   preview: {
     flex: 1,
