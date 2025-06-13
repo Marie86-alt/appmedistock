@@ -123,6 +123,37 @@ const Reminders: React.FC = () => {
       ]
     );
   };
+
+  const handleSkipReminder = (reminder: Reminder) => {
+    Alert.alert(
+      'Sauter le rappel',
+      `Voulez-vous marquer ${reminder.medication.name} comme sauté ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Confirmer',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Mettre à jour l'état local immédiatement
+              setReminders(reminders.map(r =>
+                r.id === reminder.id ? { ...r, status: 'skipped' } : r
+              ));
+
+              /* Code à utiliser lorsque l'API sera prête
+              if (api.updateReminderStatus) {
+                await api.updateReminderStatus(reminder.id, 'skipped');
+              }
+              */
+            } catch (error) {
+              console.error(error);
+              Alert.alert('Erreur', 'Impossible de mettre à jour le statut du rappel');
+            }
+          },
+        },
+      ]
+    );
+  };
   
   const formatReminderTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -526,7 +557,3 @@ const styles = StyleSheet.create({
 });
 
 export default Reminders;
-
-function handleSkipReminder(item: Reminder): void {
-    throw new Error('Function not implemented.');
-}
