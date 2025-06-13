@@ -1,19 +1,3 @@
-// // app/(auth)/_layout.tsx
-// import React from 'react';
-// import { Stack } from 'expo-router';
-
-// export default function AuthLayout() {
-//   return (
-//     <Stack screenOptions={{ headerShown: false }}>
-//       <Stack.Screen name="auth/LoginScreen" options={{ title: 'Connexion' }} />
-//       <Stack.Screen name="auth/RegisterScreen" options={{ title: 'Inscription' }} />
-//       <Stack.Screen name="auth/ForgotPasswordScreen" options={{ title: 'Mot de passe oublié' }} />
-//       <Stack.Screen name="auth/ResetPasswordScreen" options={{ title: 'Réinitialisation' }} />
-//     </Stack>
-//   );
-// }
-
-
 // app/(auth)/_layout.tsx
 import React from 'react';
 import { Stack,  useRouter } from 'expo-router';
