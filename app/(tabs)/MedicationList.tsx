@@ -37,7 +37,8 @@ const MedicationList: React.FC = () => {
       } else {
         setError('Impossible de charger la liste des médicaments');
       }
-    } catch  {
+    } catch (error) {
+      console.error( error);
       setError('Une erreur est survenue lors du chargement des données');
     } finally {
       setLoading(false);
@@ -81,7 +82,8 @@ const MedicationList: React.FC = () => {
                 loadMedications(); // Recharger la liste
               }
               */
-            } catch  {
+            } catch (error) {
+              console.error(error);
               Alert.alert(
                 'Erreur',
                 'Impossible de supprimer le médicament. Veuillez réessayer.'

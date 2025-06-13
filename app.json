@@ -34,7 +34,13 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Autoriser MediStock à accéder à la caméra pour scanner les ordonnances."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

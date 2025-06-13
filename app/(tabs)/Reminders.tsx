@@ -46,7 +46,8 @@ const Reminders: React.FC = () => {
       } else {
         setError('Impossible de charger la liste des rappels');
       }
-    } catch  {
+    } catch (error) {
+      console.error(error);
       setError('Une erreur est survenue lors du chargement des données');
     } finally {
       setLoading(false);
@@ -113,7 +114,8 @@ const Reminders: React.FC = () => {
                 ));
               }
               */
-            } catch  {
+            } catch (error) {
+              console.error(error);
               Alert.alert('Erreur', 'Impossible de mettre à jour le statut du rappel');
             }
           },

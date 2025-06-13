@@ -203,7 +203,8 @@ const AddMedication: React.FC = () => {
           }
         }
         */
-      } catch  {
+      } catch (error) {
+        console.error( error);
         Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du médicament');
       } finally {
         setIsSubmitting(false);

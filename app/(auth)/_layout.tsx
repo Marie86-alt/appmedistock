@@ -32,8 +32,8 @@ export default function AuthLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       {/* fichiers Login.tsx, Register.tsx, etc. s’appelleront automatiquement */}
-      <Stack.Screen name="Login" />
-      <Stack.Screen name="Register" />
+      {/* <Stack.Screen name="Login" />
+      <Stack.Screen name="Register" /> */}
       <Stack.Screen name="ForgotPassword" />
       <Stack.Screen name="ResetPassword" />
     </Stack>

@@ -68,7 +68,8 @@ const ForgotPassword: React.FC = () => {
 
         setResetSent(true);
         console.log('Demande de réinitialisation envoyée à:', email);
-      } catch  {
+      } catch (error) {
+        console.error(error);
         Alert.alert(
           'Erreur',
           'Une erreur est survenue lors de l\'envoi de l\'email de réinitialisation. Veuillez réessayer.'
@@ -107,7 +108,8 @@ const ForgotPassword: React.FC = () => {
         'Email envoyé',
         `Un nouvel email de réinitialisation a été envoyé à ${email}.`
       );
-    } catch  {
+    } catch (error) {
+      console.error(error);
       Alert.alert(
         'Erreur',
         'Une erreur est survenue lors de l\'envoi de l\'email de réinitialisation. Veuillez réessayer.'

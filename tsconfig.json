@@ -1,12 +1,32 @@
+// {
+//   "extends": "expo/tsconfig.base",
+//   "compilerOptions": {
+//     "strict": true,
+//     "types": ["@expo/vector-icons", "react-native", "expo-camera"],
+//     "paths": {
+//       "@/*": [
+//         "./*"
+//       ]
+//     }
+//   },
+//   "include": [
+//     "**/*.ts",
+//     "**/*.tsx",
+//     ".expo/types/**/*.ts",
+//     "expo-env.d.ts"
+//   ]
+// }
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "esModuleInterop": true, // Ajouté pour gérer les imports correctement
+    "jsx": "react-native",   // Spécifie que JSX est utilisé pour React Native
+    "types": ["@expo/vector-icons", "react-native", "expo-camera"],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+      "@/*": ["./*"]
+    },
+    "baseUrl": "." // Nécessaire pour que `paths` fonctionne correctement
   },
   "include": [
     "**/*.ts",

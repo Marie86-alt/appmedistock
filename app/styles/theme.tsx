@@ -28,7 +28,7 @@ const theme = {
         xxlarge: 22,
         title: 28,
       },
-      fontFamily: Platform.OS === 'web' ? "'Space Mono', 'monospace' : monospace" :
+      fontFamily: Platform.OS === 'web' ? "'Space Mono', 'monospace'" :
       undefined, // Utiliser la police par défaut de React Native
     },
     borderRadius: {
