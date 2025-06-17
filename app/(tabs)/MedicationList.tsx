@@ -13,8 +13,9 @@ import {
   View,
 } from 'react-native';
 import api from '../../services/api';
-import theme from '../styles/theme';
-import { Medication } from '../types/models';
+import theme from '../../src/styles/theme';
+import globalStyles from '../../src/styles/styles';
+import { Medication } from '../../src/types/models';
 
 const MedicationList: React.FC = () => {
   const router = useRouter();
@@ -97,7 +98,7 @@ const MedicationList: React.FC = () => {
 
   const renderMedicationItem = ({ item }: { item: Medication }) => (
     <TouchableOpacity
-      style={styles.medicationCard}
+      style={[styles.medicationCard, globalStyles.shadow1]}
       onPress={() => handleEditMedication(item.id)}
     >
       <View style={[styles.colorDot, { backgroundColor: item.color }]} />
@@ -284,11 +285,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.m,
     marginBottom: theme.spacing.m,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
   },
   colorDot: {
     width: 16,

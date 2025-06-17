@@ -1,22 +1,20 @@
-
-
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../contexts/AuthContext';
-import styles from '../styles/styles';
+import { useAuth } from '../../src/contexts/AuthContext';
+import styles from '../../src/styles/styles';
+//import globalStyles from '../../src/styles/styles';
 
 const Register: React.FC = () => {
   const router = useRouter();
@@ -187,7 +185,7 @@ const Register: React.FC = () => {
 
             <Text style={styles.label}>Prénom</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, styles.shadow3]}
               value={firstName}
               onChangeText={setFirstName}
               onBlur={validateFirstName}
@@ -198,7 +196,7 @@ const Register: React.FC = () => {
 
             <Text style={styles.label}>Nom</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, styles.shadow3]}
               value={lastName}
               onChangeText={setLastName}
               onBlur={validateLastName}
@@ -209,7 +207,7 @@ const Register: React.FC = () => {
 
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, styles.shadow3]}
               value={email}
               onChangeText={setEmail}
               onBlur={validateEmail}
@@ -222,7 +220,7 @@ const Register: React.FC = () => {
 
             <Text style={styles.label}>Numéro de téléphone (optionnel)</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, styles.shadow3]}
               value={phone}
               onChangeText={setPhone}
               onBlur={validatePhone}
@@ -234,7 +232,7 @@ const Register: React.FC = () => {
 
             <Text style={styles.label}>Mot de passe</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, styles.shadow3]}
               value={password}
               onChangeText={setPassword}
               onBlur={validatePassword}
@@ -246,7 +244,7 @@ const Register: React.FC = () => {
 
             <Text style={styles.label}>Confirmez le mot de passe</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, styles.shadow3]}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               onBlur={validateConfirmPassword}
@@ -281,7 +279,4 @@ const Register: React.FC = () => {
   );
 };
 
-
-
 export default Register;
-

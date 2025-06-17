@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import api from '../../services/api';
-import theme from '../styles/theme';
+import theme from '../../src/styles/theme';
 
 
 const ResetPassword: React.FC = () => {

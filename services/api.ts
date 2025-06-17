@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ApiResponse, Medication, Reminder, User } from '../app/types/models';
+import { ApiResponse, Medication, Reminder, User } from '../src/types/models';
 import { medications as mockMeds } from './_mockData';
 
 const STORAGE_USERS_KEY = 'users';

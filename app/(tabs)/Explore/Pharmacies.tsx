@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import theme from '../../styles/theme';
+import { StyleSheet, Text, View } from 'react-native';
+import theme from '../../../src/styles/theme';
 
 export default function Pharmacies() {
   return (

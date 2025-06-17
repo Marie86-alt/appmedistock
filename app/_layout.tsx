@@ -1,7 +1,7 @@
 // app/_layout.tsx
-import React from 'react';
 import { Slot } from 'expo-router';
-import { AuthProvider } from './contexts/AuthContext';
+import React from 'react';
+import { AuthProvider } from '../src/contexts/AuthContext';
 
 export default function RootLayout() {
   return (

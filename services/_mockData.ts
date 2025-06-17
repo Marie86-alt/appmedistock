@@ -1,6 +1,6 @@
 // services/_mockData.ts
 
-import { Medication, Reminder, User } from '../app/types/models';
+import { Medication, Reminder, User } from '../src/types/models';
 
 export const users: User[] = [
   {

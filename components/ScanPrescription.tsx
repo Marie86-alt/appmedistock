@@ -1,22 +1,22 @@
 // components/ScanPrescription.tsx
-import React, { useState, useRef } from 'react';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { useRouter } from 'expo-router';
+import React, { useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
   ActivityIndicator,
   Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
-import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
-import theme from '../app/styles/theme';
+import theme from '../src/styles/theme';
 
 // Import des types depuis votre fichier models
-import { ScannedMedication } from '../app/types/models';
+import { ScannedMedication } from '../src/types/models';
 
 // Interface pour les props du composant
 interface ScanPrescriptionProps {

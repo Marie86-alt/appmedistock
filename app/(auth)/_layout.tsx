@@ -15,9 +15,9 @@
 
 
 // app/(auth)/_layout.tsx
+import { Stack, useRouter } from 'expo-router';
 import React from 'react';
-import { Stack,  useRouter } from 'expo-router';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 
 export default function AuthLayout() {
   const { isAuthenticated } = useAuth();

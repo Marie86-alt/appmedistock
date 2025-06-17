@@ -2,19 +2,20 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import api from '../../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import theme from '../styles/theme';
-import { Medication, Reminder } from '../types/models';
+import { useAuth } from '../../src/contexts/AuthContext';
+import theme from '../../src/styles/theme';
+import globalStyles from '../../src/styles/styles';
+import { Medication, Reminder } from '../../src/types/models';
 
 // Interface pour les props du DashboardScreen
 interface DashboardScreenProps {
@@ -182,7 +183,7 @@ const Dashboard: React.FC<DashboardScreenProps> = ({ onLogout }) => {
           
           {getTodayReminders().length > 0 ? (
             getTodayReminders().map((reminder) => (
-              <View key={reminder.id} style={styles.reminderCard}>
+              <View key={reminder.id} style={[styles.reminderCard, globalStyles.shadow1]}>
                 <View
                   style={[
                     styles.colorDot,
@@ -222,7 +223,7 @@ const Dashboard: React.FC<DashboardScreenProps> = ({ onLogout }) => {
           
           {getLowStockMedications().length > 0 ? (
             getLowStockMedications().map((medication) => (
-              <View key={medication.id} style={styles.medicationCard}>
+              <View key={medication.id} style={[styles.medicationCard, globalStyles.shadow1]}>
                 <View
                   style={[
                     styles.colorDot,
@@ -254,7 +255,7 @@ const Dashboard: React.FC<DashboardScreenProps> = ({ onLogout }) => {
       </ScrollView>
       
       <TouchableOpacity 
-        style={styles.addButton}
+        style={[styles.addButton, globalStyles.shadow4]}
         onPress={() => router.push('/AddMedication')}
       >
         <Text style={styles.addButtonText}>+</Text>
@@ -357,11 +358,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.m,
     marginBottom: theme.spacing.s,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
   },
   colorDot: {
     width: 12,
@@ -392,11 +388,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.m,
     marginBottom: theme.spacing.s,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
   },
   medicationContent: {
     flex: 1,
@@ -437,10 +428,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   addButtonText: {
     fontSize: 24,

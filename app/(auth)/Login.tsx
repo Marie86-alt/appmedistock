@@ -1,22 +1,21 @@
-
-
-import React, { useState, useCallback } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../contexts/AuthContext';
-import theme from '../styles/theme';
+import React, { useCallback, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useAuth } from '../../src/contexts/AuthContext';
+import theme from '../../src/styles/theme';
+import globalStyles from '../../src/styles/styles';
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -86,7 +85,7 @@ const Login: React.FC = () => {
     }
   }, [email, password, login, router, validateEmail, validatePassword]);
 
-  const navigateToRegister = () => router.push('./(auth)/register');
+  const navigateToRegister = () => router.push('./Register');
   const navigateToForgotPassword = () => router.push('/ForgotPassword');
 
   return (
@@ -101,7 +100,7 @@ const Login: React.FC = () => {
           <View style={styles.formContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, globalStyles.shadow3]}
               value={email}
               onChangeText={setEmail}
               onBlur={validateEmail}
@@ -114,7 +113,7 @@ const Login: React.FC = () => {
 
             <Text style={styles.label}>Mot de passe</Text>
             <TextInput
-              style={[styles.input, styles.inputShadow]}
+              style={[styles.input, globalStyles.shadow3]}
               value={password}
               onChangeText={setPassword}
               onBlur={validatePassword}
@@ -167,15 +166,6 @@ const styles = StyleSheet.create({
   formContainer: { width: '100%' },
   label: { fontSize: theme.typography.fontSizes.medium, fontWeight: '600', marginBottom: theme.spacing.xs, color: theme.colors.text },
   input: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.borderRadius.medium, padding: theme.spacing.m, fontSize: theme.typography.fontSizes.medium, marginBottom: theme.spacing.m, backgroundColor: theme.colors.surface },
-  inputShadow: Platform.OS === 'web' ? {
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-  } : {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
   errorText: { color: theme.colors.error, fontSize: theme.typography.fontSizes.small, marginTop: -theme.spacing.m, marginBottom: theme.spacing.m },
   forgotPasswordContainer: { alignSelf: 'flex-end', marginBottom: theme.spacing.m },
   forgotPasswordText: { color: theme.colors.primary, fontSize: theme.typography.fontSizes.medium },

@@ -2,21 +2,22 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import api from '../../services/api';
-import theme from '../styles/theme';
-import { Medication } from '../types/models';
+import theme from '../../src/styles/theme';
+import globalStyles from '../../src/styles/styles';
+import { Medication } from '../../src/types/models';
 
 // Couleurs prédéfinies pour les médicaments
 const PREDEFINED_COLORS = [
@@ -656,11 +657,7 @@ const styles = StyleSheet.create({
   selectedColorOption: {
     borderWidth: 3,
     borderColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
+    ...globalStyles.shadow2,
   },
   submitButton: {
     backgroundColor: theme.colors.primary,

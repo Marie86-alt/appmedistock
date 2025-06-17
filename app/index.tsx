@@ -1,8 +1,8 @@
 // app/index.tsx
 import { Redirect } from 'expo-router';
-import { useAuth } from './contexts/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
-import theme from './styles/theme';
+import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from '../src/contexts/AuthContext';
+import theme from '../src/styles/theme';
 
 export default function Index() {
   const { isAuthenticated, isLoading } = useAuth();

@@ -36,8 +36,45 @@ export default StyleSheet.create({
   registerContainer: { flexDirection: 'row', justifyContent: 'center', gap: theme.spacing.xs },
   registerText: { fontSize: theme.typography.fontSizes.medium, color: theme.colors.textSecondary },
   registerLink: { fontSize: theme.typography.fontSizes.medium, color: theme.colors.primary, fontWeight: '600' },
+
+  // Styles d'ombre réutilisables - optimisés pour web et mobile
+  shadow1: Platform.OS === 'web' ? {
+    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+  } : {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  shadow2: Platform.OS === 'web' ? {
+    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.3)',
+  } : {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+
+  shadow3: Platform.OS === 'web' ? {
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  } : {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  shadow4: Platform.OS === 'web' ? {
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
+  } : {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
 });
-
-
-
-

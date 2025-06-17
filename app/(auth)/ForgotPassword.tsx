@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 //import { AuthStackParamList } from '../navigation/AuthNavigator';
 import api from '../../services/api';
-import theme from '../styles/theme';
+import theme from '../../src/styles/theme';
 //
 
 const ForgotPassword: React.FC = () => {

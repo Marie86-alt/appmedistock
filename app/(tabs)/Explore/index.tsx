@@ -1,7 +1,7 @@
-import React from 'react';
-import { Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import theme from '../../styles/theme';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import theme from '../../../src/styles/theme';
 
 export default function ExploreIndex() {
   const router = useRouter();

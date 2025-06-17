@@ -102,12 +102,13 @@
 
 
 // app/(tabs)/_layout.tsx
-import React from 'react';
-import { Tabs, Redirect } from 'expo-router';
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import theme from '../styles/theme';
-import { useAuth } from '../contexts/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
+import { Redirect, Tabs } from 'expo-router';
+import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from '../../src/contexts/AuthContext';
+import theme from '../../src/styles/theme';
+// import { Edit3 } from 'lucide-react-native';
 
 export default function TabsLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -166,7 +167,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="AddMedication"
         options={{
-          title: '',
+          title: 'Ajouter',
           tabBarIcon: ({ color, size }) => <AntDesign name="pluscircle" size={size + 8} color={color} />,
         }}
       />
@@ -192,9 +193,10 @@ export default function TabsLayout() {
       {/* EditMedication - Caché de la barre */}
       <Tabs.Screen
         name="EditMedication"
-        options={{
+        options={{title: 'Modifier',
           href: null,
           tabBarStyle: { display: 'none' },
+          tabBarIcon: ({ color, size }) => <AntDesign name="edit" size={size} color={color} />,
         }}
       />
     </Tabs>

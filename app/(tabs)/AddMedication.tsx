@@ -1,20 +1,21 @@
 // app/main/AddMedicationScreen.tsx
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import theme from '../styles/theme';
+import theme from '../../src/styles/theme';
+import globalStyles from '../../src/styles/styles';
 //import api from '../../services/api';
 
 // Couleurs prédéfinies pour les médicaments
@@ -512,11 +513,7 @@ const styles = StyleSheet.create({
   selectedColorOption: {
     borderWidth: 3,
     borderColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
+    ...globalStyles.shadow2,
   },
   submitButton: {
     backgroundColor: theme.colors.primary,

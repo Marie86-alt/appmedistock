@@ -13,8 +13,9 @@ import {
   View,
 } from 'react-native';
 import api from '../../services/api';
-import theme from '../styles/theme';
-import { Reminder } from '../types/models';
+import theme from '../../src/styles/theme';
+import globalStyles from '../../src/styles/styles';
+import { Reminder } from '../../src/types/models';
 
 const Reminders: React.FC = () => {
   const router = useRouter();
@@ -110,6 +111,44 @@ const Reminders: React.FC = () => {
                 
                 // Mettre à jour l'état local
                 setReminders(reminders.map(r => 
+                  r.id === reminder.id ? { ...r, status: 'taken' } : r
+                ));
+              }
+              */
+            } catch (error) {
+              console.error(error);
+              Alert.alert('Erreur', 'Impossible de mettre à jour le statut du rappel');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSkipReminder = (reminder: Reminder) => {
+    Alert.alert(
+      'Sauter ce rappel',
+      `Confirmer que vous voulez sauter la prise de ${reminder.medication.name} ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Sauter',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Simuler temporairement un message
+              Alert.alert(
+                'Fonctionnalité à venir',
+                'Cette action sera disponible dans une prochaine mise à jour.',
+                [{ text: 'OK' }]
+              );
+              
+              /* Code à utiliser lorsque l'API sera prête
+              if (api.updateReminderStatus) {
+                await api.updateReminderStatus(reminder.id, 'skipped');
+                
+                // Mettre à jour l'état local
+                setReminders(reminders.map(r => 
                   r.id === reminder.id ? { ...r, status: 'skipped' } : r
                 ));
               }
@@ -156,7 +195,7 @@ const Reminders: React.FC = () => {
   };
   
   const renderReminderItem = ({ item }: { item: Reminder }) => (
-    <View style={styles.reminderCard}>
+    <View style={[styles.reminderCard, globalStyles.shadow1]}>
       <View 
         style={[
           styles.colorIndicator, 
@@ -433,11 +472,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.medium,
     marginBottom: theme.spacing.m,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
     overflow: 'hidden',
   },
   colorIndicator: {
@@ -526,7 +560,3 @@ const styles = StyleSheet.create({
 });
 
 export default Reminders;
-
-function handleSkipReminder(item: Reminder): void {
-    throw new Error('Function not implemented.');
-}
