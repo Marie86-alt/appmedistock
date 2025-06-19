@@ -199,6 +199,14 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <AntDesign name="edit" size={size} color={color} />,
         }}
       />
+
+      <Tabs.Screen
+  name="AddReminder"
+  options={{
+    href: null, // Caché de la navigation, accessible par push
+    tabBarStyle: { display: 'none' },
+  }}
+/>
     </Tabs>
   );
 }

@@ -70,19 +70,14 @@ const MedicationList: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Afficher temporairement un message
-              Alert.alert(
-                'Fonctionnalité à venir',
-                'La suppression de médicaments sera disponible dans une prochaine mise à jour.',
-                [{ text: 'OK' }]
-              );
-              // Lorsque l'API sera prête, décommentez ce code
-              /*
-              if (api.deleteMedication) {
-                await api.deleteMedication(medication.id);
+              const response = await api.deleteMedication(medication.id);
+              
+              if (response.success) {
+                Alert.alert('Suppression réussie', `${medication.name} a été supprimé.`);
                 loadMedications(); // Recharger la liste
+              } else {
+                Alert.alert('Erreur', response.message || 'Impossible de supprimer le médicament');
               }
-              */
             } catch (error) {
               console.error(error);
               Alert.alert(

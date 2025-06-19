@@ -140,6 +140,16 @@ const api = {
     api._meds[idx] = updated;
     return { success: true, data: updated, message: 'Médicament mis à jour' };
   },
+  deleteMedication: async (id: string): Promise<ApiResponse<void>> => {
+  console.log('[api.deleteMedication] id =', id);
+  await new Promise(res => setTimeout(res, 300));
+  const idx = api._meds.findIndex(m => m.id === id);
+  if (idx === -1) {
+    return { success: false, message: `Médicament ${id} non trouvé` };
+  }
+  api._meds.splice(idx, 1);
+  return { success: true, message: 'Médicament supprimé' };
+},
 
   // ----------------------------------------
   // Rappels
@@ -177,6 +187,27 @@ const api = {
       return { success: false, message: 'Erreur ajout rappel' };
     }
   },
+
+updateReminderStatus: async (
+  id: string, 
+  status: 'pending' | 'taken' | 'skipped' | 'missed'
+): Promise<ApiResponse<Reminder>> => {
+  console.log('[api.updateReminderStatus] id =', id, 'status =', status);
+  try {
+    const json = await AsyncStorage.getItem(STORAGE_REMINDERS_KEY);
+    const list: Reminder[] = json ? JSON.parse(json) : [];
+    const idx = list.findIndex(r => r.id === id);
+    if (idx === -1) {
+      return { success: false, message: `Rappel ${id} non trouvé` };
+    }
+    list[idx] = { ...list[idx], status, updatedAt: new Date().toISOString() };
+    await AsyncStorage.setItem(STORAGE_REMINDERS_KEY, JSON.stringify(list));
+    return { success: true, data: list[idx], message: 'Statut mis à jour' };
+  } catch (err) {
+    console.error('[api.updateReminderStatus] erreur', err);
+    return { success: false, message: 'Erreur mise à jour statut' };
+  }
+},
 
   // ----------------------------------------
   // Réinitialisation mot de passe

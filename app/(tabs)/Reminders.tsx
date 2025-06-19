@@ -1,6 +1,6 @@
-// app/main/RemindersScreen.tsx
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -36,11 +36,20 @@ const Reminders: React.FC = () => {
   useEffect(() => {
     loadReminders();
   }, []);
+
+  // Recharger quand on revient sur l'écran
+  useFocusEffect(
+    useCallback(() => {
+      loadReminders();
+    }, [])
+  );
   
   const loadReminders = async () => {
     try {
       setError(null);
       const response = await api.getReminders();
+      
+      console.log('📋 Rappels chargés:', response.data); // Debug
       
       if (response.success && response.data) {
         setReminders(response.data);
@@ -48,7 +57,7 @@ const Reminders: React.FC = () => {
         setError('Impossible de charger la liste des rappels');
       }
     } catch (error) {
-      console.error(error);
+      console.error('❌ Erreur chargement rappels:', error);
       setError('Une erreur est survenue lors du chargement des données');
     } finally {
       setLoading(false);
@@ -63,7 +72,10 @@ const Reminders: React.FC = () => {
   
   // Fonction pour filtrer les rappels selon le filtre actif
   const getFilteredReminders = () => {
+    console.log('🔍 Filtrage:', { activeFilter, totalReminders: reminders.length });
+    
     if (activeFilter === 'all') {
+      console.log('📄 Tous les rappels:', reminders);
       return reminders;
     }
     
@@ -73,14 +85,26 @@ const Reminders: React.FC = () => {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
       
-      return reminders.filter(reminder => {
+      const todayReminders = reminders.filter(reminder => {
         const reminderDate = new Date(reminder.scheduledFor);
-        return reminderDate >= today && reminderDate < tomorrow;
+        const isToday = reminderDate >= today && reminderDate < tomorrow;
+        console.log('📅 Rappel:', reminder.medication.name, 'Date:', reminderDate, 'Est aujourd\'hui:', isToday);
+        return isToday;
       });
+      
+      console.log('📅 Rappels d\'aujourd\'hui:', todayReminders);
+      return todayReminders;
     }
     
-    if (activeFilter === 'pending' || activeFilter === 'taken') {
-      return reminders.filter(reminder => reminder.status === activeFilter);
+    if (activeFilter === 'pending' || activeFilter === 'taken' || activeFilter === 'skipped') {
+      const statusReminders = reminders.filter(reminder => {
+        const matches = reminder.status === activeFilter;
+        console.log('🏷️ Rappel:', reminder.medication.name, 'Statut:', reminder.status, 'Correspond:', matches);
+        return matches;
+      });
+      
+      console.log(`🏷️ Rappels ${activeFilter}:`, statusReminders);
+      return statusReminders;
     }
     
     return reminders;
@@ -97,24 +121,17 @@ const Reminders: React.FC = () => {
           style: 'default',
           onPress: async () => {
             try {
-              // Simuler temporairement un message
-              Alert.alert(
-                'Fonctionnalité à venir',
-                'Cette action sera disponible dans une prochaine mise à jour.',
-                [{ text: 'OK' }]
-              );
+              const response = await api.updateReminderStatus(reminder.id, 'taken');
               
-              /* Code à utiliser lorsque l'API sera prête
-              if (api.updateReminderStatus) {
-                const updatedReminder = { ...reminder, status: 'taken' };
-                await api.updateReminderStatus(reminder.id, 'taken');
-                
+              if (response.success) {
                 // Mettre à jour l'état local
                 setReminders(reminders.map(r => 
                   r.id === reminder.id ? { ...r, status: 'taken' } : r
                 ));
+                Alert.alert('Succès', `Prise de ${reminder.medication.name} confirmée.`);
+              } else {
+                Alert.alert('Erreur', response.message || 'Impossible de mettre à jour le statut');
               }
-              */
             } catch (error) {
               console.error(error);
               Alert.alert('Erreur', 'Impossible de mettre à jour le statut du rappel');
@@ -136,23 +153,17 @@ const Reminders: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Simuler temporairement un message
-              Alert.alert(
-                'Fonctionnalité à venir',
-                'Cette action sera disponible dans une prochaine mise à jour.',
-                [{ text: 'OK' }]
-              );
+              const response = await api.updateReminderStatus(reminder.id, 'skipped');
               
-              /* Code à utiliser lorsque l'API sera prête
-              if (api.updateReminderStatus) {
-                await api.updateReminderStatus(reminder.id, 'skipped');
-                
+              if (response.success) {
                 // Mettre à jour l'état local
                 setReminders(reminders.map(r => 
                   r.id === reminder.id ? { ...r, status: 'skipped' } : r
                 ));
+                Alert.alert('Rappel sauté', `Prise de ${reminder.medication.name} marquée comme sautée.`);
+              } else {
+                Alert.alert('Erreur', response.message || 'Impossible de mettre à jour le statut');
               }
-              */
             } catch (error) {
               console.error(error);
               Alert.alert('Erreur', 'Impossible de mettre à jour le statut du rappel');
@@ -199,7 +210,7 @@ const Reminders: React.FC = () => {
       <View 
         style={[
           styles.colorIndicator, 
-          { backgroundColor: item.medication.color }
+          { backgroundColor: item.medication.color || '#2196F3' }
         ]} 
       />
       <View style={styles.reminderContent}>
@@ -210,6 +221,7 @@ const Reminders: React.FC = () => {
         <Text style={styles.reminderDate}>
           {formatReminderDate(item.scheduledFor)}
         </Text>
+        <Text style={styles.statusDebug}>Statut: {item.status}</Text>
       </View>
       
       {item.status === 'pending' && (
@@ -256,6 +268,8 @@ const Reminders: React.FC = () => {
       </SafeAreaView>
     );
   }
+
+  const filteredReminders = getFilteredReminders();
   
   return (
     <SafeAreaView style={styles.container}>
@@ -266,16 +280,10 @@ const Reminders: React.FC = () => {
         >
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Rappels</Text>
+        <Text style={styles.title}>Rappels ({reminders.length})</Text>
         <TouchableOpacity 
           style={styles.addButton}
-          onPress={() => {
-            Alert.alert(
-              'Fonctionnalité à venir',
-              'L\'ajout de rappels sera disponible dans une prochaine mise à jour.',
-              [{ text: 'OK' }]
-            );
-          }}
+          onPress={() => router.push('/AddReminder')}
         >
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
@@ -312,20 +320,14 @@ const Reminders: React.FC = () => {
         </View>
       ) : (
         <>
-          {getFilteredReminders().length === 0 ? (
+          {filteredReminders.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
-                Aucun rappel {activeFilter !== 'all' ? 'pour ce filtre' : ''}.
+                Aucun rappel {activeFilter !== 'all' ? `pour "${activeFilter}"` : ''}.
               </Text>
               <TouchableOpacity
                 style={styles.addFirstButton}
-                onPress={() => {
-                  Alert.alert(
-                    'Fonctionnalité à venir',
-                    'L\'ajout de rappels sera disponible dans une prochaine mise à jour.',
-                    [{ text: 'OK' }]
-                  );
-                }}
+                onPress={() => router.push('/AddReminder')}
               >
                 <Text style={styles.addFirstButtonText}>
                   Ajouter un rappel
@@ -334,7 +336,7 @@ const Reminders: React.FC = () => {
             </View>
           ) : (
             <FlatList
-              data={getFilteredReminders()}
+              data={filteredReminders}
               renderItem={renderReminderItem}
               keyExtractor={item => item.id}
               contentContainerStyle={styles.listContent}
@@ -497,6 +499,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSizes.small,
     color: theme.colors.primary,
   },
+  statusDebug: {
+    fontSize: theme.typography.fontSizes.small,
+    color: theme.colors.error,
+    fontStyle: 'italic',
+  },
   actionButtons: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -520,7 +527,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: theme.colors.secondary,
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -530,7 +537,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   statusIndicator: {
-    backgroundColor: theme.colors.secondary,
+    backgroundColor: '#4CAF50',
     paddingVertical: theme.spacing.xs,
     paddingHorizontal: theme.spacing.m,
     borderRadius: theme.borderRadius.medium,

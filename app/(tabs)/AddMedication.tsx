@@ -1,4 +1,4 @@
-// app/main/AddMedicationScreen.tsx
+// app/(tabs)/AddMedication.tsx
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import theme from '../../src/styles/theme';
 import globalStyles from '../../src/styles/styles';
-//import api from '../../services/api';
+import api from '../../services/api';
 
 // Couleurs prédéfinies pour les médicaments
 const PREDEFINED_COLORS = [
@@ -148,8 +148,6 @@ const AddMedication: React.FC = () => {
       
       try {
         // Construire l'objet médicament
-        // Cette variable sera utilisée lorsque l'API sera implémentée
-        // Pour le développement, on la log dans la console
         const medicationData = {
           name,
           description,
@@ -162,50 +160,32 @@ const AddMedication: React.FC = () => {
           color: selectedColor,
           notes,
           isActive: true,
-          frequency: 'asNeeded', // Par défaut
+          frequency: 'asNeeded' as const, // Par défaut avec type strict
           patientId: '1', // À remplacer par l'ID réel de l'utilisateur
         };
         
         // Log les données pour le développement
         console.log('Données du médicament à ajouter:', medicationData);
         
-        // Simuler temporairement l'ajout d'un médicament
-        // Dans une version future, cela serait remplacé par un appel à l'API
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Appel à l'API
+        const response = await api.addMedication(medicationData);
         
-        Alert.alert(
-          'Fonctionnalité en développement',
-          'L\'ajout de médicaments sera disponible dans une prochaine mise à jour.',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.back(),
-            },
-          ]
-        );
-        
-        /* Code à utiliser lorsque l'API sera prête
-        if (api.addMedication) {
-          const response = await api.addMedication(medicationData);
-          
-          if (response.success) {
-            Alert.alert(
-              'Médicament ajouté',
-              `${name} a été ajouté avec succès à votre liste de médicaments.`,
-              [
-                {
-                  text: 'OK',
-                  onPress: () => router.back(), // Retour à l'écran précédent
-                },
-              ]
-            );
-          } else {
-            Alert.alert('Erreur', response.message || 'Impossible d\'ajouter le médicament');
-          }
+        if (response.success) {
+          Alert.alert(
+            'Médicament ajouté',
+            `${name} a été ajouté avec succès à votre liste de médicaments.`,
+            [
+              {
+                text: 'OK',
+                onPress: () => router.back(), // Retour à l'écran précédent
+              },
+            ]
+          );
+        } else {
+          Alert.alert('Erreur', response.message || 'Impossible d\'ajouter le médicament');
         }
-        */
       } catch (error) {
-        console.error( error);
+        console.error('Erreur lors de l\'ajout du médicament:', error);
         Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du médicament');
       } finally {
         setIsSubmitting(false);
